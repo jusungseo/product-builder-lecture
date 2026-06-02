@@ -55,12 +55,31 @@
 
         <!-- Generator Screen -->
         <section id="generator-screen" class="screen hidden">
-            <div class="content">
+            <div class="content scrollable">
                 <h2 class="section-title">Fortune Generator</h2>
                 <div class="control-panel">
                     <button id="generator-btn" class="action-button">Generate Numbers</button>
                 </div>
                 <div id="lotto-numbers-container" class="ball-container"></div>
+                
+                <!-- Disqus Comments -->
+                <div id="disqus_container" class="disqus-container">
+                    <div id="disqus_thread"></div>
+                    <script>
+                        var disqus_config = function () {
+                            this.page.url = window.location.href;
+                            this.page.identifier = 'lotto-luck-generator';
+                        };
+                        (function() {
+                            var d = document, s = d.createElement('script');
+                            s.src = 'https://product-builder-lhgwsobcjd.disqus.com/embed.js';
+                            s.setAttribute('data-timestamp', +new Date());
+                            (d.head || d.body).appendChild(s);
+                        })();
+                    </script>
+                    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                </div>
+
                 <button id="back-btn" class="text-button">← Back to Home</button>
             </div>
         </section>
