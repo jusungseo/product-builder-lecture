@@ -22,7 +22,34 @@
             <div class="content">
                 <h1 class="hero-title">Lotto Luck</h1>
                 <p class="hero-subtitle">Test your fortune today</p>
-                <button id="enter-btn" class="glow-button">Enter Experience</button>
+                <div class="button-group">
+                    <button id="enter-btn" class="glow-button">Enter Experience</button>
+                    <button id="partnership-btn" class="secondary-button">Partnership Inquiry</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Partnership Screen -->
+        <section id="partnership-screen" class="screen hidden">
+            <div class="content">
+                <h2 class="section-title">Partnership</h2>
+                <form id="partnership-form" action="https://formspree.io/f/mjgzjlon" method="POST" class="contact-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" name="name" id="name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" name="email" id="email" placeholder="john@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea name="message" id="message" placeholder="How can we help you?" required></textarea>
+                    </div>
+                    <button type="submit" id="submit-btn" class="action-button">Send Message</button>
+                    <div id="form-status" class="form-status"></div>
+                </form>
+                <button id="close-partnership-btn" class="text-button">← Back to Home</button>
             </div>
         </section>
 

@@ -35,7 +35,7 @@ class LottoBall extends HTMLElement {
                     align-items: center;
                     font-size: 1.4rem;
                     font-weight: 800;
-                    color: white; /* Force white text */
+                    color: white;
                     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
                     background: ${isBonus ? 'linear-gradient(135deg, #fb7185, #e11d48)' : this.getGradient(number)};
@@ -101,16 +101,30 @@ themeBtn.addEventListener('click', () => {
 // Navigation Logic
 const landingScreen = document.getElementById('landing-screen');
 const generatorScreen = document.getElementById('generator-screen');
+const partnershipScreen = document.getElementById('partnership-screen');
+
 const enterBtn = document.getElementById('enter-btn');
+const partnershipBtn = document.getElementById('partnership-btn');
 const backBtn = document.getElementById('back-btn');
+const closePartnershipBtn = document.getElementById('close-partnership-btn');
 
 enterBtn.addEventListener('click', () => {
     landingScreen.classList.add('hidden');
     generatorScreen.classList.remove('hidden');
 });
 
+partnershipBtn.addEventListener('click', () => {
+    landingScreen.classList.add('hidden');
+    partnershipScreen.classList.remove('hidden');
+});
+
 backBtn.addEventListener('click', () => {
     generatorScreen.classList.add('hidden');
+    landingScreen.classList.remove('hidden');
+});
+
+closePartnershipBtn.addEventListener('click', () => {
+    partnershipScreen.classList.add('hidden');
     landingScreen.classList.remove('hidden');
 });
 
@@ -150,3 +164,51 @@ generatorBtn.addEventListener('click', () => {
         lottoNumbersContainer.appendChild(bonusBall);
     }, 6 * 100 + 200);
 });
+
+// Partnership Form Handling
+const partnershipForm = document.getElementById('partnership-form');
+const formStatus = document.getElementById('form-status');
+const submitBtn = document.getElementById('submit-btn');
+
+if (partnershipForm) {
+    partnershipForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const data = new FormData(partnershipForm);
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        formStatus.style.display = 'none';
+        formStatus.className = 'form-status';
+
+        try {
+            const response = await fetch(partnershipForm.action, {
+                method: partnershipForm.method,
+                body: data,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                formStatus.textContent = "Thanks! Your message has been sent.";
+                formStatus.classList.add('success');
+                partnershipForm.reset();
+            } else {
+                const result = await response.json();
+                if (Object.hasOwn(result, 'errors')) {
+                    formStatus.textContent = result.errors.map(error => error.message).join(", ");
+                } else {
+                    formStatus.textContent = "Oops! There was a problem submitting your form";
+                }
+                formStatus.classList.add('error');
+            }
+        } catch (error) {
+            formStatus.textContent = "Oops! Connection error. Please try again later.";
+            formStatus.classList.add('error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Message';
+            formStatus.style.display = 'block';
+        }
+    });
+}
