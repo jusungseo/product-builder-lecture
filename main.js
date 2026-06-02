@@ -1,214 +1,194 @@
-class LottoBall extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+/**
+ * Animal Face Test - Core Logic
+ * Uses Teachable Machine Image Model to classify user photos.
+ */
+
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/arJGmo0PU/";
+
+let model;
+let maxPredictions;
+
+/**
+ * UI Element Selectors
+ */
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('file-input');
+const imagePreview = document.getElementById('image-preview');
+const actionGroup = document.getElementById('action-group');
+const uploadSection = document.getElementById('upload-section');
+const loadingSection = document.getElementById('loading-section');
+const resultSection = document.getElementById('result-section');
+const labelContainer = document.getElementById('label-container');
+const resultTitle = document.getElementById('result-title');
+const resultDesc = document.getElementById('result-desc');
+
+/**
+ * Animal Traits Mapping
+ */
+const ANIMAL_TRAITS = {
+    'dog': {
+        title: '친근한 강아지상',
+        desc: '다정다감하고 에너지가 넘치는 당신! 주변 사람들에게 긍정적인 에너지를 주는 매력 넘치는 스타일이군요.'
+    },
+    'cat': {
+        title: '도도한 고양이상',
+        desc: '차분하면서도 신비로운 분위기를 가진 당신! 처음엔 낯을 가릴지 몰라도 알면 알수록 깊은 매력을 가진 스타일이군요.'
+    },
+    'default': {
+        title: '신비로운 동물상',
+        desc: '다양한 매력이 공존하는 특별한 관상을 가지고 계시네요!'
+    }
+};
+
+/**
+ * Initialize the application
+ */
+async function init() {
+    try {
+        const modelURL = MODEL_URL + "model.json";
+        const metadataURL = MODEL_URL + "metadata.json";
+
+        // Load the model
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+        console.log("Model loaded successfully.");
+    } catch (error) {
+        console.error("Error loading model:", error);
+        alert("모델을 불러오는 중 오류가 발생했습니다. 페이지를 새로고침 해주세요.");
+    }
+}
+
+/**
+ * Handle File Upload
+ */
+function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.classList.remove('hidden');
+        actionGroup.classList.remove('hidden');
+        document.querySelector('.upload-content').classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+/**
+ * Run Prediction
+ */
+async function predict() {
+    if (!model) {
+        alert("모델이 아직 준비되지 않았습니다. 잠시만 기다려주세요.");
+        return;
     }
 
-    connectedCallback() {
-        this.render();
-    }
+    // Show loading
+    uploadSection.classList.add('hidden');
+    loadingSection.classList.remove('hidden');
 
-    static get observedAttributes() {
-        return ['number', 'bonus'];
-    }
-
-    attributeChangedCallback() {
-        this.render();
-    }
-
-    render() {
-        const number = this.getAttribute('number') || '?';
-        const isBonus = this.hasAttribute('bonus');
+    try {
+        // Run model prediction
+        const prediction = await model.predict(imagePreview);
         
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: inline-block;
-                    margin: 5px;
-                }
-                .ball {
-                    width: 55px;
-                    height: 55px;
-                    border-radius: 50%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    font-size: 1.4rem;
-                    font-weight: 800;
-                    color: white;
-                    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-                    background: ${isBonus ? 'linear-gradient(135deg, #fb7185, #e11d48)' : this.getGradient(number)};
-                    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                    opacity: 0;
-                    transform: scale(0.5);
-                    position: relative;
-                }
+        // Sort by probability
+        prediction.sort((a, b) => b.probability - a.probability);
 
-                @keyframes popIn {
-                    to {
-                        opacity: 1;
-                        transform: scale(1);
-                    }
-                }
+        // Update UI with results
+        renderResults(prediction);
+    } catch (error) {
+        console.error("Prediction error:", error);
+        alert("분석 중 오류가 발생했습니다.");
+        resetApp();
+    }
+}
 
-                .label {
-                    position: absolute;
-                    top: -20px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    font-size: 0.65rem;
-                    background: #e11d48;
-                    color: white;
-                    padding: 2px 6px;
-                    border-radius: 4px;
-                    font-weight: 700;
-                    white-space: nowrap;
-                    display: ${isBonus ? 'block' : 'none'};
-                }
-            </style>
-            <div class="ball">
-                <span class="label">BONUS</span>
-                ${number}
+/**
+ * Render Results to UI
+ */
+function renderResults(predictions) {
+    loadingSection.classList.add('hidden');
+    resultSection.classList.remove('hidden');
+
+    labelContainer.innerHTML = '';
+    
+    // Top prediction for title/desc
+    const topResult = predictions[0];
+    const className = topResult.className.toLowerCase();
+    const trait = ANIMAL_TRAITS[className] || ANIMAL_TRAITS.default;
+
+    resultTitle.textContent = `당신은 ${trait.title}!`;
+    resultDesc.textContent = trait.desc;
+
+    // Build charts
+    predictions.forEach(p => {
+        const percentage = (p.probability * 100).toFixed(0);
+        const chartItem = document.createElement('div');
+        chartItem.className = 'chart-item';
+        
+        chartItem.innerHTML = `
+            <div class="label-info">
+                <span>${p.className}</span>
+                <span>${percentage}%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: 0%"></div>
             </div>
         `;
-    }
-
-    getGradient(number) {
-        const num = parseInt(number);
-        if (num <= 10) return 'linear-gradient(135deg, #fbbf24, #d97706)'; // Yellow
-        if (num <= 20) return 'linear-gradient(135deg, #60a5fa, #2563eb)'; // Blue
-        if (num <= 30) return 'linear-gradient(135deg, #f87171, #dc2626)'; // Red
-        if (num <= 40) return 'linear-gradient(135deg, #4ade80, #16a34a)'; // Green
-        return 'linear-gradient(135deg, #a78bfa, #7c3aed)'; // Purple
-    }
-}
-
-if (!customElements.get('lotto-ball')) {
-    customElements.define('lotto-ball', LottoBall);
-}
-
-// Theme Management
-const themeBtn = document.getElementById('theme-btn');
-const body = document.body;
-
-themeBtn.addEventListener('click', () => {
-    const isLight = body.getAttribute('data-theme') === 'light';
-    body.setAttribute('data-theme', isLight ? 'dark' : 'light');
-    themeBtn.textContent = isLight ? '🌙 Dark Mode' : '☀️ Light Mode';
-});
-
-// Navigation Logic
-const landingScreen = document.getElementById('landing-screen');
-const generatorScreen = document.getElementById('generator-screen');
-const partnershipScreen = document.getElementById('partnership-screen');
-
-const enterBtn = document.getElementById('enter-btn');
-const partnershipBtn = document.getElementById('partnership-btn');
-const backBtn = document.getElementById('back-btn');
-const closePartnershipBtn = document.getElementById('close-partnership-btn');
-
-enterBtn.addEventListener('click', () => {
-    landingScreen.classList.add('hidden');
-    generatorScreen.classList.remove('hidden');
-});
-
-partnershipBtn.addEventListener('click', () => {
-    landingScreen.classList.add('hidden');
-    partnershipScreen.classList.remove('hidden');
-});
-
-backBtn.addEventListener('click', () => {
-    generatorScreen.classList.add('hidden');
-    landingScreen.classList.remove('hidden');
-});
-
-closePartnershipBtn.addEventListener('click', () => {
-    partnershipScreen.classList.add('hidden');
-    landingScreen.classList.remove('hidden');
-});
-
-// Generator Logic
-const generatorBtn = document.getElementById('generator-btn');
-const lottoNumbersContainer = document.getElementById('lotto-numbers-container');
-
-generatorBtn.addEventListener('click', () => {
-    lottoNumbersContainer.innerHTML = '';
-    
-    const numbersSet = new Set();
-    while (numbersSet.size < 7) {
-        numbersSet.add(Math.floor(Math.random() * 45) + 1);
-    }
-
-    const allNumbers = Array.from(numbersSet);
-    const mainNumbers = allNumbers.slice(0, 6).sort((a, b) => a - b);
-    const bonusNumber = allNumbers[6];
-    
-    mainNumbers.forEach((number, index) => {
-        setTimeout(() => {
-            const ball = document.createElement('lotto-ball');
-            ball.setAttribute('number', number);
-            lottoNumbersContainer.appendChild(ball);
-        }, index * 100);
-    });
-
-    setTimeout(() => {
-        const plus = document.createElement('span');
-        plus.className = 'plus-sign';
-        plus.textContent = '+';
-        lottoNumbersContainer.appendChild(plus);
-
-        const bonusBall = document.createElement('lotto-ball');
-        bonusBall.setAttribute('number', bonusNumber);
-        bonusBall.setAttribute('bonus', '');
-        lottoNumbersContainer.appendChild(bonusBall);
-    }, 6 * 100 + 200);
-});
-
-// Partnership Form Handling
-const partnershipForm = document.getElementById('partnership-form');
-const formStatus = document.getElementById('form-status');
-const submitBtn = document.getElementById('submit-btn');
-
-if (partnershipForm) {
-    partnershipForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
         
-        const data = new FormData(partnershipForm);
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
-        formStatus.style.display = 'none';
-        formStatus.className = 'form-status';
-
-        try {
-            const response = await fetch(partnershipForm.action, {
-                method: partnershipForm.method,
-                body: data,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                formStatus.textContent = "Thanks! Your message has been sent.";
-                formStatus.classList.add('success');
-                partnershipForm.reset();
-            } else {
-                const result = await response.json();
-                if (Object.hasOwn(result, 'errors')) {
-                    formStatus.textContent = result.errors.map(error => error.message).join(", ");
-                } else {
-                    formStatus.textContent = "Oops! There was a problem submitting your form";
-                }
-                formStatus.classList.add('error');
-            }
-        } catch (error) {
-            formStatus.textContent = "Oops! Connection error. Please try again later.";
-            formStatus.classList.add('error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Send Message';
-            formStatus.style.display = 'block';
-        }
+        labelContainer.appendChild(chartItem);
+        
+        // Animate bar after a small delay
+        setTimeout(() => {
+            chartItem.querySelector('.progress-bar').style.width = `${percentage}%`;
+        }, 100);
     });
 }
+
+/**
+ * Reset application state
+ */
+function resetApp() {
+    resultSection.classList.add('hidden');
+    loadingSection.classList.add('hidden');
+    uploadSection.classList.remove('hidden');
+    
+    // Clear upload area
+    imagePreview.classList.add('hidden');
+    imagePreview.src = '';
+    actionGroup.classList.add('hidden');
+    document.querySelector('.upload-content').classList.remove('hidden');
+    fileInput.value = '';
+}
+
+/**
+ * Event Listeners
+ */
+uploadZone.addEventListener('click', () => fileInput.click());
+
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--accent-color)';
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = 'oklch(0% 0 0 / 0.1)';
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'oklch(0% 0 0 / 0.1)';
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+});
+
+fileInput.addEventListener('change', (e) => {
+    handleFile(e.target.files[0]);
+});
+
+document.getElementById('analyze-btn').addEventListener('click', predict);
+document.getElementById('retry-btn').addEventListener('click', resetApp);
+document.getElementById('restart-btn').addEventListener('click', resetApp);
+
+// Start initialization
+init();

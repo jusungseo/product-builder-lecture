@@ -1,89 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotto Luck - Number Generator</title>
+    <title>인공지능 동물상 테스트</title>
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body data-theme="dark">
-    <div class="app-wrapper">
-        <!-- Theme Toggle -->
-        <div class="theme-toggle">
-            <button id="theme-btn">☀️ Light Mode</button>
-        </div>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1 class="title">동물상 테스트</h1>
+            <p class="subtitle">AI가 분석하는 나의 숨겨진 동물상 찾기</p>
+        </header>
 
-        <!-- Landing Screen -->
-        <section id="landing-screen" class="screen">
-            <div class="content">
-                <h1 class="hero-title">Lotto Luck</h1>
-                <p class="hero-subtitle">Test your fortune today</p>
-                <div class="button-group">
-                    <button id="enter-btn" class="glow-button">Enter Experience</button>
-                    <button id="partnership-btn" class="secondary-button">Partnership Inquiry</button>
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section id="upload-section" class="card">
+                <div class="upload-zone" id="upload-zone">
+                    <input type="file" id="file-input" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <div class="upload-icon">📸</div>
+                        <p class="upload-text">사진을 클릭하거나 드래그하여 업로드하세요</p>
+                        <p class="upload-hint">얼굴이 잘 나온 사진일수록 정확도가 높습니다.</p>
+                    </div>
+                    <img id="image-preview" class="image-preview hidden" alt="사용자 사진 미리보기">
                 </div>
-            </div>
-        </section>
-
-        <!-- Partnership Screen -->
-        <section id="partnership-screen" class="screen hidden">
-            <div class="content">
-                <h2 class="section-title">Partnership</h2>
-                <form id="partnership-form" action="https://formspree.io/f/mjgzjlon" method="POST" class="contact-form">
-                    <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" name="name" id="name" placeholder="John Doe" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" name="email" id="email" placeholder="john@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Message</label>
-                        <textarea name="message" id="message" placeholder="How can we help you?" required></textarea>
-                    </div>
-                    <button type="submit" id="submit-btn" class="action-button">Send Message</button>
-                    <div id="form-status" class="form-status"></div>
-                </form>
-                <button id="close-partnership-btn" class="text-button">← Back to Home</button>
-            </div>
-        </section>
-
-        <!-- Generator Screen -->
-        <section id="generator-screen" class="screen hidden">
-            <div class="content scrollable">
-                <h2 class="section-title">Fortune Generator</h2>
-                <div class="control-panel">
-                    <button id="generator-btn" class="action-button">Generate Numbers</button>
-                </div>
-                <div id="lotto-numbers-container" class="ball-container"></div>
                 
-                <!-- Disqus Comments -->
-                <div id="disqus_container" class="disqus-container">
-                    <div id="disqus_thread"></div>
-                    <script>
-                        var disqus_config = function () {
-                            this.page.url = window.location.href;
-                            this.page.identifier = 'lotto-luck-generator';
-                        };
-                        (function() {
-                            var d = document, s = d.createElement('script');
-                            s.src = 'https://product-builder-lhgwsobcjd.disqus.com/embed.js';
-                            s.setAttribute('data-timestamp', +new Date());
-                            (d.head || d.body).appendChild(s);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                <div class="action-group hidden" id="action-group">
+                    <button id="analyze-btn" class="btn btn-primary">분석 시작하기</button>
+                    <button id="retry-btn" class="btn btn-secondary">사진 다시 고르기</button>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section id="loading-section" class="card hidden">
+                <div class="loader-content">
+                    <div class="spinner"></div>
+                    <p>AI가 관상 정보를 분석하고 있습니다...</p>
+                </div>
+            </section>
+
+            <!-- Result Section -->
+            <section id="result-section" class="card hidden">
+                <div class="result-header">
+                    <h2 id="result-title" class="result-title">당신은 강아지상!</h2>
+                    <p id="result-desc" class="result-desc">친근하고 다정다감한 성격의 소유자시군요.</p>
                 </div>
 
-                <button id="back-btn" class="text-button">← Back to Home</button>
-            </div>
-        </section>
+                <div class="result-charts" id="label-container">
+                    <!-- Progress bars will be injected here -->
+                </div>
+
+                <button id="restart-btn" class="btn btn-primary">다시 테스트하기</button>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2026 AI Animal Face Test. Powered by Teachable Machine.</p>
+        </footer>
     </div>
-    <script src="main.js"></script>
+
+    <!-- TensorFlow & Teachable Machine Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>

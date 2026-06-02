@@ -1,22 +1,39 @@
-# Project: Lotto Number Generator with Landing Page
+# Project: Animal Face Test (동물상 테스트)
 
 ## Overview
-A modern, visually appealing web application that generates random lotto numbers. It features a stylish landing page that welcomes users before they enter the generator experience.
+A modern, playful web application that analyzes a user's face to determine if they look more like a dog or a cat. It uses a Teachable Machine model for image classification and features a sleek, responsive design.
 
 ## Features
-- **Landing Page**: A beautiful entry screen with a 'Enter' button.
-- **Lotto Generator**: A clean interface to generate 6 random numbers (1-45).
-- **Partnership Inquiry**: A modern form for potential partners to reach out via Formspree.
-- **Web Components**: Custom `<lotto-ball>` elements for consistent and encapsulated styling.
-- **Modern CSS**: Using gradients, transitions, and flexible layouts.
+- **Photo Upload**: Simple and intuitive drag-and-drop or file picker for selfies.
+- **AI Analysis**: Real-time processing of the uploaded image using a pre-trained TensorFlow.js model.
+- **Visual Results**: Dynamic display of results with percentage bars and descriptive traits for "Dog" and "Cat" types.
+- **Modern UI**: High-end aesthetics with glassmorphism, OKLCH colors, and smooth animations.
+- **Responsive Design**: Works perfectly on both mobile and desktop.
 
-## Implementation Details
-- **HTML5**: Semantic structure for sections, including a contact form.
-- **CSS3**: Modern styling with animations, glassmorphism, and responsive design.
-- **JavaScript (ES6)**: State management for screen transitions.
-- **Formspree**: Backend for form submissions.
+## Technical Details
+- **Frontend**: Vanilla HTML5, CSS3 (Baseline features), and JavaScript (ES Modules).
+- **AI Engine**: Google Teachable Machine (Image Model).
+- **Libraries**: TensorFlow.js, Teachable Machine Image Library.
+- **Styling**: Modern CSS (Container Queries, `:has()` selector, Logical Properties, OKLCH).
 
-## Current Plan: Enhance Partnership Inquiry Form
-1.  **Refine `index.html`**: Add a success message container and ensure accessibility for the form.
-2.  **Enhance `style.css`**: Apply premium styling, including glow effects on focus, subtle glassmorphism for inputs, and transitions for form states.
-3.  **Upgrade `main.js`**: Implement AJAX-based submission using `fetch` to Formspree, handling loading, success, and error states without page reloads.
+## Implementation Plan (Current)
+1.  **Environment Setup**:
+    *   Update `index.html` with new metadata and library scripts.
+    *   Prepare `style.css` for new design language.
+    *   Initialize `main.js` with ES Module structure.
+2.  **UI Construction**:
+    *   Build the Hero section and the Upload Zone.
+    *   Create a hidden "Result" section to be revealed after analysis.
+    *   Implement modern progress bars for classification scores.
+3.  **Core Logic (main.js)**:
+    *   Implement `ImageUploader` module to handle file reading and preview.
+    *   Implement `ModelManager` to load the Teachable Machine model and run predictions.
+    *   Implement `UIController` to manage transitions and result rendering.
+4.  **Aesthetics & Polish**:
+    *   Apply premium textures and shadows.
+    *   Add micro-interactions for buttons and upload states.
+    *   Ensure accessibility (ARIA labels, keyboard navigation).
+5.  **Verification**:
+    *   Test image classification accuracy.
+    *   Verify responsive layout on various screen sizes.
+    *   Check for any console errors or performance bottlenecks.
